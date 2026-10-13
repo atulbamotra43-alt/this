@@ -137,6 +137,10 @@ class StudentManager:
                 for item in data
             ]
 
+        except (json.JSONDecodeError, KeyError, TypeError) as error:
+            print("Could not load student data:", error)
+            self.students = []
+
     # -----------------------------------------------------
     # SAVE DATA
     # -----------------------------------------------------
@@ -154,7 +158,10 @@ class StudentManager:
 
             return True
 
-        
+        except OSError as error:
+            print("Could not save data:", error)
+            return False
+
     # -----------------------------------------------------
     # GENERATE ID
     # -----------------------------------------------------
@@ -180,6 +187,10 @@ class StudentManager:
         while True:
             try:
                 value = int(input(prompt))
+
+                if minimum is not None and value < minimum:
+                    print(f"Value must be at least {minimum}.")
+                    continue
 
                 if maximum is not None and value > maximum:
                     print(f"Value must not exceed {maximum}.")
@@ -216,7 +227,8 @@ class StudentManager:
             ):
                 return email
 
-            
+            print("Please enter a valid email address.")
+
     # -----------------------------------------------------
     # FIND STUDENT
     # -----------------------------------------------------
@@ -256,7 +268,16 @@ class StudentManager:
             "Enter attendance (0-100): ", 0, 100
         )
 
-        
+        student = Student(
+            student_id,
+            name,
+            age,
+            course,
+            email,
+            marks,
+            attendance
+        )
+
         self.students.append(student)
 
         if self.save_data():
