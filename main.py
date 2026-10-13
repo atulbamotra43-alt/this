@@ -30,10 +30,41 @@ import json
 import os
 import shutil
 from datetime import datetime
+from dataclasses import dataclass
+from typing import Callable
 
 
 DATA_FILE = "students.json"
 BACKUP_FILE = "students_backup.json"
+
+
+# =========================================================
+# BUTTON COMPONENT
+# =========================================================
+
+@dataclass
+class Button:
+    """Represent an actionable option in the command-line menu."""
+
+    label: str
+    shortcut: str
+    on_click: Callable[[], None]
+    enabled: bool = True
+
+    def render(self):
+        """Return the button's menu representation."""
+
+        state = "" if self.enabled else " (disabled)"
+        return f"{self.shortcut:>2}. {self.label}{state}"
+
+    def click(self):
+        """Run the button action when the button is enabled."""
+
+        if not self.enabled:
+            return False
+
+        self.on_click()
+        return True
 
 
 # =========================================================
@@ -799,14 +830,29 @@ class StudentManager:
     # MAIN MENU
     # -----------------------------------------------------
 
-    def show_menu(self):
-        """Display all available features."""
+    def get_menu_buttons(self):
+        """Build the buttons used by the main menu."""
 
-        print("\n" + "=" * 50)
-        print("        STUDENT MANAGEMENT SYSTEM")
-        print("=" * 50)
+        actions = [
+            self.add_student,
+            self.view_students,
+            self.search_student,
+            self.update_student,
+            self.delete_student,
+            self.sort_students,
+            self.filter_by_course,
+            self.show_statistics,
+            self.show_top_students,
+            self.filter_by_marks,
+            self.update_attendance,
+            self.export_data,
+            self.backup_data,
+            self.restore_backup,
+            self.delete_all_students,
+            lambda: None
+        ]
 
-        menu_items = [
+        labels = [
             "Add Student",
             "View All Students",
             "Search Student",
@@ -825,8 +871,22 @@ class StudentManager:
             "Exit"
         ]
 
-        for number, item in enumerate(menu_items, start=1):
-            print(f"{number:2}. {item}")
+        return [
+            Button(label, str(number), action)
+            for number, (label, action) in enumerate(
+                zip(labels, actions), start=1
+            )
+        ]
+
+    def show_menu(self):
+        """Display all available features."""
+
+        print("\n" + "=" * 50)
+        print("        STUDENT MANAGEMENT SYSTEM")
+        print("=" * 50)
+
+        for button in self.get_menu_buttons():
+            print(button.render())
 
         print("=" * 50)
 
@@ -839,24 +899,6 @@ class StudentManager:
 
         print("\nWelcome to Student Management System!")
 
-        actions = {
-            "1": self.add_student,
-            "2": self.view_students,
-            "3": self.search_student,
-            "4": self.update_student,
-            "5": self.delete_student,
-            "6": self.sort_students,
-            "7": self.filter_by_course,
-            "8": self.show_statistics,
-            "9": self.show_top_students,
-            "10": self.filter_by_marks,
-            "11": self.update_attendance,
-            "12": self.export_data,
-            "13": self.backup_data,
-            "14": self.restore_backup,
-            "15": self.delete_all_students
-        }
-
         while True:
             self.show_menu()
             choice = input("Enter your choice (1-16): ").strip()
@@ -865,14 +907,21 @@ class StudentManager:
                 print("Thank you for using Student Management System!")
                 break
 
-            action = actions.get(choice)
+            button = next(
+                (
+                    menu_button
+                    for menu_button in self.get_menu_buttons()
+                    if menu_button.shortcut == choice
+                ),
+                None
+            )
 
-            if action is None:
+            if button is None:
                 print("Invalid choice. Please choose from 1 to 16.")
                 continue
 
             try:
-                action()
+                button.click()
             except (KeyboardInterrupt, EOFError):
                 print("\nInput cancelled.")
             except Exception as error:
