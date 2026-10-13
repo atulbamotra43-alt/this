@@ -888,9 +888,4 @@ class StudentManager:
 def main():
     """Create the manager and run the application."""
 
-    manager = StudentManager()
-    manager.run()
-
-
-if __name__ == "__main__":
-    main()
+  
