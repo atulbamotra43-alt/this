@@ -12,4 +12,3 @@ The available sample contains only `README.md`, whose sole content is the reposi
 ## Watch out for
 
 - Do not infer architecture or project conventions from the repository name alone; inspect additional files before applying review rules.
-- Flag significant implementation changes only against conventions established elsewhere in the repository, since `README.md` provides no behavioral or technical requirements.
