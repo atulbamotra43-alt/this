@@ -857,12 +857,19 @@ class StudentManager:
             "15": self.delete_all_students
         }
 
-        
+        while True:
+            self.show_menu()
+            choice = input("Enter your choice (1-16): ").strip()
+
             if choice == "16":
                 print("Thank you for using Student Management System!")
                 break
 
             action = actions.get(choice)
+
+            if action is None:
+                print("Invalid choice. Please choose from 1 to 16.")
+                continue
 
             try:
                 action()
